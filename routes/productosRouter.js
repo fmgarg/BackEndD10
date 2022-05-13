@@ -160,7 +160,7 @@ productosRouter.get ('/'
     , async (req, res)=>{
             let products = await items.getAll()
             fakeApi = ()=> products
-            console.log(req.session.cookie.maxAge)
+            //console.log(req.session.cookie.maxAge)
             if(req.session.cookie.maxAge>=1){
                 res.render('datos', {suggestedChamps: fakeApi(), listExists: true})
             }else{

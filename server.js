@@ -53,11 +53,8 @@ app.set('views', './views')
 const fs = require('fs');
 const { response } = require('express')
 
-//const nombreArchivo = 'messages.txt'
-//let messagesNotParse = fs.readFileSync('./messages.txt', 'utf-8')
 const userAdmin = []
 let messages = []
-//console.log (messages)
 
 io.on('connection', (socket) => {
       console.log('socket connection')
@@ -76,7 +73,6 @@ io.on('connection', (socket) => {
                   let insertNewMSGonBDD = await knexMSG('MSG')
                                                 .insert(mensaje)
                                                 .then(() => {
-                                                  //messages.push(mensaje)
                                                   console.log('newMessage insert')
                                                 })
                                                 .catch((err) => {
@@ -88,9 +84,7 @@ io.on('connection', (socket) => {
                                                 })
                 
                 await messages.push(mensaje)
-                //console.log(newMessages)
                 io.sockets.emit('messages', messages)
-                //console.log (messages)
       })
 
       socket.on('nuevo-producto', (newProduct) => {
@@ -139,85 +133,47 @@ async function getAll (){
 
 //--------------------------LOGIN--CON---SESSION ---------------------------//
 
-//----METODO DE SAVE SESSION CON RUTA(path) y TIEMPO (ttl)/ cookie maxAge
+//----METODO DE SAVE SESSION a nivel de la aplicacion y TIEMPO (ttl)/ cookie maxAge
 app.use(
   session({
     store: connectMongo.create ({
           mongoUrl: 'mongodb+srv://ex888gof:2013facu@cluster0.mnmsh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
-          ,ttl: 10
+          ,ttl: 600
           ,autoRemove: 'disabled'
           ,mongoOptions: advanceOptions
     })
     ,secret: 'secreto'
     ,resave: true
     ,saveUninitialized: true
-    ,cookie: { maxAge: 10000 }
+    ,cookie: { maxAge: 600000 }
   })
 )
 
-//----METODO DE LOGIN con PASSWORD----------------
-//const sessionId = {_id:{}}
+//----METODO DE LOGIN -------------------------
+
 app.use(cookieParser())
 
 app.post('/login'
-                ,async (req, res, next) => {
-                  const { 
-                        user
-                        //,password
-                        } = req.body
-                  //console.log(user,password)
-                  //res.send('este es el post')
-                  
-                  if (!user 
-                    //!== 'pepe' || password !== 'pepepass'
-                    ) {
-                    return res.redirect('/')
+                ,async (req, res) => {
+                  const {user} = req.body
+                  if (!user) {
+                      return res.redirect('/')
                   }
-                  req.session.user = user
-                  //req.session.admin = true
-                  const userLogin = {user:{}}
-                  userLogin['user']= user
-                  userAdmin.push(userLogin)
-                  console.log(req.session.cookie.maxAge)
-
-                  res.redirect('/home')
-                  next()
+                      req.session.user = user
+                      const userLogin = {user:{}}
+                      userLogin['user']= user
+                      userAdmin.push(userLogin)
+                      res.redirect('/home')
                 }
-                /*
-                ,async (req, res, next) => {
-                  await setTimeout(function () {
-                      if(req.session.cookie.maxAge<=1){
-                          //aca la cookie expiro
-                          console.log('este es el time control 1')
-                          console.log(req.session.cookie.maxAge)
-                          next();
-                  
-                      }else{
-                          //aca la cookie esta vigente
-                          console.log('este es el time control 2')
-                          console.log(req.session.cookie.maxAge)
-                      }
-                      
-                  }, 11000);
-                }
-                ,(req, res) => {
-                  console.log('aca deberia redirigir o recargar')
-                  //res.redirect('/')
-                }
-                */
 )
 
 app.use('/home'
               ,function (req, res, next) {
-                if (userAdmin.length !== 0){
-                    //console.log(userAdmin)
-                    console.log(req.cookie)
-                      //req.session.cookie.expires)
-                    next ()
-                } else {
-                    //res.send ({ error: 'acceso no autorizado'})
+                if (!req.session.user){
                     res.redirect('/')
-                }
+                } else {
+                    next ()
+                  }
               }
               ,productosRouter
 )
@@ -233,19 +189,7 @@ app.get('/logout', (req, res) => {
   })
 })
 
-/*
-//-----METODO DE ACCESO A RUTA PRIVADO CON FUNCION---
-function auth(req, res, next) {
-                                if (req.session?.user === 'pepe' && req.session?.admin) {
-                                  return next()
-                                }
-                                return res.status(401).send('error de autorización!')
-}
-
-app.get('/privado', auth, (req, res) => {
-                               res.send('si estas viendo esto es porque ya te logueaste!')
-})
-*/
+//-----METODO para ver las cookies-----------------
 app.get('/cookies', (req, res) =>{
   res.send(req.cookies)
 })

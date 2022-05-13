@@ -3,8 +3,12 @@
 Este proyecto se encuentra realizado utilizando JS, NodeJS, express, express-handlebars, express-session, sockets.io y bootstrap, entre otras.
 
 Al ingresar a la ruta localhost:8080 te vas a encontrar con el formulario de login.
-En usuario admin es el unico con acceso. User: pepe y Password: pepepass
-Al hacer login ingresa al landing de productos, se puede ver el nombre del user en el margen superior de la pagina junto a un boton de logout. El admin puede agregar productos y mensajes en el chat.
+Todos los usuarios tienen acceso a la ruta '/home' donde se encuentran las vistas del socket de  productos y mensajes. 
+Al hacer login se puede ver el nombre del user en el margen superior de la pagina junto a un boton de logout. El desde ahí puede agregar productos y mensajes en el chat.
+
+Si se agota la sesión la página se recarga (usando window.location.reload del lado del front) y vuelve al login.
+
+Si el user hace un logout, visualiza durante 2 segundos el mensaje de despedida y es redirigido a la ruta del login (se utilizó un setTimeout con window.location hacia la ruta '/login')
 
 ## Consideraciones generales
 
